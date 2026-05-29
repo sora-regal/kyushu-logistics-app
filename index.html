@@ -662,13 +662,13 @@ async function loadUserProfile(){
     const rows=await res.json();
     if(rows&&rows.length>0){
       const data=rows[0];userProfile=data;
-      // wrong_idsをSupabaseから復元
-      if(data.wrong_ids&&Array.isArray(data.wrong_ids)&&data.wrong_ids.length>0){
-        wrongIds=data.wrong_ids;
-      }
       // question_statsをSupabaseから復元
       if(data.question_stats&&typeof data.question_stats==='object'){
         questionStats=data.question_stats;
+        // question_statsからwrong_idsを再計算（正解率60%以下・2回以上）
+        wrongIds=Object.entries(questionStats)
+          .filter(([,v])=>v.total>=2&&(v.correct/v.total)<=0.6)
+          .map(([k])=>parseInt(k));
       }
       const end=new Date(data.contract_end);const now=new Date();const isActive=end>=now;
       document.getElementById('user-contract-display').textContent=`契約期間: ${data.contract_start} 〜 ${data.contract_end}`;
