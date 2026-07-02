@@ -4,42 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>九州運輸局 法令試験対策</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Rajdhani:wght@600;700&family=Shippori+Mincho:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --blue:#1a56db;--blue-dark:#1240a8;--blue-light:#e8f0fe;--blue-mid:#2563eb;
-  --cyan:#0891b2;--cyan-light:#e0f7fa;
-  --white:#ffffff;--off-white:#f8faff;
-  --gray-50:#f1f5f9;--gray-100:#e2e8f0;--gray-300:#94a3b8;--gray-500:#64748b;--gray-700:#334155;--gray-900:#0f172a;
-  --red:#dc2626;--red-light:#fef2f2;
-  --green:#16a34a;--green-light:#f0fdf4;
-  --orange:#ea580c;--orange-light:#fff7ed;
-  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.06);
-  --shadow-blue:0 4px 20px rgba(26,86,219,0.15);
-  --radius:14px;--radius-sm:10px;--radius-xs:8px
+  --blue:#13285a;--blue-dark:#0a1c42;--blue-light:#eef2f9;--blue-mid:#1a3a72;
+  --cyan:#2b5ca8;--cyan-light:#e8f0fa;
+  --white:#ffffff;--off-white:#f6f8fc;
+  --gray-50:#f2f5fa;--gray-100:#e3e9f2;--gray-300:#9aa8bf;--gray-500:#5f6e88;--gray-700:#2e3b52;--gray-900:#101b30;
+  --red:#c0392b;--red-light:#fdf1f0;
+  --green:#1e7a4c;--green-light:#eef8f2;
+  --orange:#c47a1a;--orange-light:#fdf6ec;
+  --shadow:0 1px 3px rgba(16,27,48,0.06),0 6px 24px rgba(16,27,48,0.05);
+  --shadow-blue:0 6px 24px rgba(19,40,90,0.18);
+  --radius:16px;--radius-sm:12px;--radius-xs:10px
 }
 body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var(--gray-900);min-height:100vh;font-size:15px;line-height:1.7}
 .screen{display:none;min-height:100vh}
 .screen.active{display:flex;flex-direction:column}
 
 /* ===== LOGIN ===== */
-#login-screen{justify-content:center;align-items:center;background:linear-gradient(160deg,#1240a8 0%,#1a56db 45%,#0891b2 100%);position:relative;overflow:hidden}
-#login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 80%,rgba(255,255,255,0.08) 0%,transparent 60%);pointer-events:none}
+#login-screen{justify-content:center;align-items:center;background:linear-gradient(165deg,#0a1c42 0%,#13285a 55%,#1a3a72 100%);position:relative;overflow:hidden}
+#login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 75% 15%,rgba(255,255,255,0.06) 0%,transparent 55%);pointer-events:none}
 .login-truck-area{position:absolute;bottom:0;left:0;right:0;height:48%;overflow:hidden;pointer-events:none}
-.login-card{background:var(--white);border-radius:24px;padding:40px 32px;width:100%;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.25);position:relative;z-index:2;margin:16px}
-.login-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue-light);border-radius:24px;padding:6px 16px;font-size:12px;color:var(--blue);font-weight:700;letter-spacing:1px;margin-bottom:20px}
-.login-title{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--gray-900);letter-spacing:2px;margin-bottom:4px}
+.login-card{background:var(--white);border-radius:20px;padding:44px 34px;width:100%;max-width:410px;text-align:center;box-shadow:0 24px 70px rgba(10,28,66,0.35);position:relative;z-index:2;margin:16px}
+.login-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue-light);border-radius:24px;padding:7px 18px;font-size:11px;color:var(--blue);font-weight:700;letter-spacing:2px;margin-bottom:22px}
+.login-title{font-family:'Shippori Mincho',serif;font-size:26px;font-weight:800;color:var(--gray-900);letter-spacing:3px;margin-bottom:6px;line-height:1.4}
 .login-subtitle{font-size:13px;color:var(--gray-500);margin-bottom:28px}
 .form-group{margin-bottom:14px;text-align:left}
 .form-label{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:1px;margin-bottom:6px;display:block;text-transform:uppercase}
 .form-input{width:100%;padding:14px 16px;background:var(--gray-50);border:1.5px solid var(--gray-100);border-radius:var(--radius-xs);font-size:15px;color:var(--gray-900);outline:none;transition:all 0.2s;font-family:'Noto Sans JP',sans-serif}
 .form-input::placeholder{color:var(--gray-300)}
-.form-input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(26,86,219,0.1)}
-.btn-primary{width:100%;background:linear-gradient(135deg,var(--blue-mid),var(--cyan));color:white;border:none;padding:16px;border-radius:var(--radius-xs);font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;transition:all 0.2s;letter-spacing:0.5px;font-family:'Noto Sans JP',sans-serif;box-shadow:var(--shadow-blue)}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(26,86,219,0.3)}
+.form-input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(19,40,90,0.1)}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;border:none;padding:16px;border-radius:var(--radius-xs);font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;transition:all 0.2s;letter-spacing:0.5px;font-family:'Noto Sans JP',sans-serif;box-shadow:var(--shadow-blue)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(19,40,90,0.28)}
 .btn-primary:active{transform:translateY(0)}
 .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 .login-error{color:var(--red);font-size:13px;margin-top:12px;display:none;text-align:center;background:var(--red-light);border-radius:8px;padding:8px}
@@ -49,8 +49,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 /* ===== HEADER ===== */
 .header{background:var(--white);color:var(--gray-900);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--gray-100);box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 .header-logo{display:flex;align-items:center;gap:10px;flex:1}
-.header-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue-mid),var(--cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.header-logo-text{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;color:var(--gray-900)}
+.header-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.header-logo-text{font-family:'Shippori Mincho',serif;font-size:16px;font-weight:700;letter-spacing:1.5px;color:var(--gray-900)}
 .header-logo-sub{font-size:10px;color:var(--gray-500);margin-top:-2px}
 .btn-back{background:var(--gray-50);border:1.5px solid var(--gray-100);color:var(--gray-700);padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all 0.2s}
 .btn-back:hover{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
@@ -59,7 +59,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 #menu-screen{background:var(--off-white)}
 .menu-content{padding:16px;flex:1}
 
-.user-card{background:linear-gradient(135deg,var(--blue-mid),var(--cyan));border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-blue)}
+.user-card{background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-blue)}
 .user-avatar{width:46px;height:46px;background:rgba(255,255,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .user-info{flex:1;min-width:0}
 .user-email{font-size:14px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -81,8 +81,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 .csv-status{flex:1;font-size:13px}
 .csv-status strong{display:block;color:var(--gray-900);font-size:14px}
 .csv-status span{color:var(--gray-500);font-size:12px}
-.btn-csv{background:linear-gradient(135deg,var(--blue-mid),var(--cyan));color:white;border:none;padding:12px 20px;border-radius:var(--radius-xs);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;box-shadow:0 2px 8px rgba(26,86,219,0.25);transition:all 0.2s}
-.btn-csv:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,86,219,0.35)}
+.btn-csv{background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;border:none;padding:12px 20px;border-radius:var(--radius-xs);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;box-shadow:0 2px 8px rgba(19,40,90,0.22);transition:all 0.2s}
+.btn-csv:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(19,40,90,0.3)}
 #csv-file-input{display:none}
 
 .section-label{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:1.5px;margin-bottom:10px;text-transform:uppercase}
@@ -94,7 +94,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 .mode-icon.y{background:linear-gradient(135deg,#dbeafe,#bfdbfe)}
 .mode-icon.f{background:linear-gradient(135deg,#d1fae5,#a7f3d0)}
 .mode-icon.r{background:linear-gradient(135deg,#fee2e2,#fecaca)}
-.mode-text strong{display:block;font-size:15px;color:var(--gray-900);margin-bottom:3px}
+.mode-text strong{display:block;font-family:'Shippori Mincho',serif;font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:4px}
 .mode-text span{font-size:12px;color:var(--gray-500)}
 .mode-arrow{margin-left:auto;color:var(--gray-300);font-size:20px;font-weight:300}
 
@@ -142,9 +142,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 .result-label.ng{color:var(--red)}
 .result-explanation{font-size:14px;line-height:1.8;color:var(--gray-700)}
 .quiz-actions{display:flex;gap:10px;margin-top:4px}
-.btn-next{flex:1;background:linear-gradient(135deg,var(--blue-mid),var(--cyan));color:white;border:none;padding:18px;border-radius:var(--radius-xs);font-size:16px;font-weight:700;cursor:pointer;display:none;font-family:'Noto Sans JP',sans-serif;box-shadow:var(--shadow-blue);transition:all 0.2s}
+.btn-next{flex:1;background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;border:none;padding:18px;border-radius:var(--radius-xs);font-size:16px;font-weight:700;cursor:pointer;display:none;font-family:'Noto Sans JP',sans-serif;box-shadow:var(--shadow-blue);transition:all 0.2s}
 .btn-next.show{display:block}
-.btn-next:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,86,219,0.3)}
+.btn-next:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(19,40,90,0.28)}
 .btn-quit-mid{background:var(--white);color:var(--gray-500);border:1.5px solid var(--gray-100);padding:18px 16px;border-radius:var(--radius-xs);font-size:14px;font-weight:700;cursor:pointer;display:none;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;transition:all 0.2s;box-shadow:var(--shadow)}
 .btn-quit-mid.show{display:block}
 .btn-quit-mid:hover{background:var(--red-light);border-color:var(--red);color:var(--red)}
@@ -160,7 +160,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 .modal-score-sub{font-size:12px;color:var(--gray-500)}
 .modal-actions{display:flex;gap:10px}
 .btn-modal{flex:1;padding:14px;border-radius:var(--radius-xs);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;transition:all 0.2s}
-.btn-modal.primary{background:linear-gradient(135deg,var(--blue-mid),var(--cyan));color:white;box-shadow:var(--shadow-blue)}
+.btn-modal.primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;box-shadow:var(--shadow-blue)}
 .btn-modal.primary:hover{transform:translateY(-1px)}
 .btn-modal.secondary{background:var(--gray-50);color:var(--gray-700);border:1.5px solid var(--gray-100)}
 .btn-modal.secondary:hover{background:var(--gray-100)}
@@ -168,7 +168,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 /* ===== RESULT ===== */
 #result-screen{justify-content:center;align-items:center;background:var(--off-white)}
 .result-wrap{padding:32px 20px;text-align:center;max-width:420px;width:100%}
-.result-circle{width:130px;height:130px;border-radius:50%;background:linear-gradient(135deg,var(--blue-mid),var(--cyan));display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:var(--shadow-blue)}
+.result-circle{width:130px;height:130px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:var(--shadow-blue)}
 .result-score{font-family:'Rajdhani',sans-serif;font-size:42px;font-weight:700;color:white;line-height:1}
 .result-denom{font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px}
 .result-msg{font-size:20px;font-weight:700;margin-bottom:8px;color:var(--gray-900)}
@@ -178,8 +178,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 .cumulative-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .result-actions{display:flex;flex-direction:column;gap:12px}
 .btn-result{padding:16px;border-radius:var(--radius-xs);font-size:15px;font-weight:700;cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;transition:all 0.2s}
-.btn-result.primary{background:linear-gradient(135deg,var(--blue-mid),var(--cyan));color:white;box-shadow:var(--shadow-blue)}
-.btn-result.primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,86,219,0.3)}
+.btn-result.primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;box-shadow:var(--shadow-blue)}
+.btn-result.primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(19,40,90,0.28)}
 .btn-result.secondary{background:var(--white);color:var(--blue);border:1.5px solid var(--blue)}
 .btn-result.secondary:hover{background:var(--blue-light)}
 
@@ -196,7 +196,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 .admin-section-title{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
 .user-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100)}
 .user-row:last-child{border-bottom:none}
-.user-row-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--blue-mid),var(--cyan));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:white}
+.user-row-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:white}
 .user-row-info{flex:1;min-width:0}
 .user-row-email{font-size:13px;font-weight:600;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-row-meta{font-size:11px;color:var(--gray-500);margin-top:2px}
@@ -242,18 +242,18 @@ canvas{max-width:100%}
       <rect x="130" y="135" width="420" height="107" rx="4" fill="url(#truckBody)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
       <line x1="340" y1="140" x2="340" y2="240" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
       <line x1="130" y1="188" x2="550" y2="188" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
-      <text x="310" y="172" font-family="Rajdhani,sans-serif" font-size="20" font-weight="700" fill="rgba(26,86,219,0.6)" text-anchor="middle" letter-spacing="3">九州運輸局 法令試験対策</text>
+      <text x="310" y="172" font-family="Rajdhani,sans-serif" font-size="20" font-weight="700" fill="rgba(19,40,90,0.55)" text-anchor="middle" letter-spacing="3">九州運輸局 法令試験対策</text>
       <rect x="550" y="158" width="130" height="84" rx="6" fill="url(#cabGrad)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-      <rect x="558" y="166" width="78" height="48" rx="4" fill="rgba(26,86,219,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+      <rect x="558" y="166" width="78" height="48" rx="4" fill="rgba(19,40,90,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
       <rect x="550" y="150" width="130" height="10" rx="3" fill="rgba(255,255,255,0.4)"/>
       <rect x="672" y="122" width="8" height="36" rx="4" fill="rgba(255,255,255,0.4)"/>
       <rect x="676" y="196" width="18" height="9" rx="2" fill="white" opacity="0.8"/>
-      <circle cx="220" cy="242" r="27" fill="rgba(26,86,219,0.3)" stroke="white" stroke-width="2"/>
-      <circle cx="220" cy="242" r="17" fill="rgba(26,86,219,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-      <circle cx="440" cy="242" r="27" fill="rgba(26,86,219,0.3)" stroke="white" stroke-width="2"/>
-      <circle cx="440" cy="242" r="17" fill="rgba(26,86,219,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-      <circle cx="600" cy="242" r="27" fill="rgba(26,86,219,0.3)" stroke="white" stroke-width="2"/>
-      <circle cx="600" cy="242" r="17" fill="rgba(26,86,219,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+      <circle cx="220" cy="242" r="27" fill="rgba(19,40,90,0.28)" stroke="white" stroke-width="2"/>
+      <circle cx="220" cy="242" r="17" fill="rgba(19,40,90,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+      <circle cx="440" cy="242" r="27" fill="rgba(19,40,90,0.28)" stroke="white" stroke-width="2"/>
+      <circle cx="440" cy="242" r="17" fill="rgba(19,40,90,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+      <circle cx="600" cy="242" r="27" fill="rgba(19,40,90,0.28)" stroke="white" stroke-width="2"/>
+      <circle cx="600" cy="242" r="17" fill="rgba(19,40,90,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
       <line x1="20" y1="178" x2="120" y2="178" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="4,6"/>
       <line x1="5" y1="192" x2="120" y2="192" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-dasharray="3,8"/>
     </svg>
@@ -398,8 +398,8 @@ canvas{max-width:100%}
     <div style="background:var(--white);border-radius:var(--radius);border:1.5px solid var(--gray-100);padding:12px 16px;box-shadow:var(--shadow)">
       <div style="font-size:11px;font-weight:700;color:var(--blue);letter-spacing:1px;margin-bottom:10px">出題順序</div>
       <div style="display:flex;gap:8px">
-        <button id="order-shuffle" onclick="setOrder('shuffle')" style="flex:1;padding:10px;border-radius:var(--radius-xs);border:1.5px solid var(--blue);background:var(--blue);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">🔀 シャッフル</button>
-        <button id="order-normal" onclick="setOrder('normal')" style="flex:1;padding:10px;border-radius:var(--radius-xs);border:1.5px solid var(--gray-100);background:var(--white);color:var(--gray-700);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">📋 順番通り</button>
+        <button id="order-normal" onclick="setOrder('normal')" style="flex:1;padding:10px;border-radius:var(--radius-xs);border:1.5px solid var(--blue);background:var(--blue);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">📋 順番通り</button>
+        <button id="order-shuffle" onclick="setOrder('shuffle')" style="flex:1;padding:10px;border-radius:var(--radius-xs);border:1.5px solid var(--gray-100);background:var(--white);color:var(--gray-700);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">🔀 シャッフル</button>
       </div>
     </div>
   </div>
@@ -460,7 +460,7 @@ canvas{max-width:100%}
       <button class="btn-next" id="btn-next" onclick="nextQuestion()">次の問題へ →</button>
       <button class="btn-quit-mid" id="btn-quit-mid" onclick="openQuitModal()">終了</button>
     </div>
-    <button id="btn-submit-multi" onclick="submitMultiAnswer(currentList[currentIndex])" style="display:none;width:100%;background:linear-gradient(135deg,#2563eb,#0891b2);color:white;border:none;padding:18px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px;font-family:'Noto Sans JP',sans-serif;box-shadow:0 4px 20px rgba(26,86,219,0.4);transition:all 0.2s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">回答する ✓</button>
+    <button id="btn-submit-multi" onclick="submitMultiAnswer(currentList[currentIndex])" style="display:none;width:100%;background:linear-gradient(135deg,#13285a,#2b5ca8);color:white;border:none;padding:18px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px;font-family:'Noto Sans JP',sans-serif;box-shadow:0 4px 20px rgba(19,40,90,0.35);transition:all 0.2s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">回答する ✓</button>
   </div>
 </div>
 
@@ -590,7 +590,7 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const{createClient}=supabase;const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,userProfile=null;
 let questions=[],currentList=[],currentIndex=0;
-let quizOrder='shuffle';
+let quizOrder='normal';
 let allStudyRecords=[];
 let correctCount=0,wrongCount=0,answeredCount=0;
 let wrongIds=[],answered=false,currentMode='';
