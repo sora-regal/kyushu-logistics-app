@@ -741,7 +741,7 @@ async function loadQuestionsFromSupabase(){
     document.getElementById('csv-count').textContent='Supabaseから問題を取得しています';
     const loadingEl=document.getElementById('csv-loading');
     if(loadingEl)loadingEl.textContent='⏳';
-    const{data,error}=await sb.from('questions').select('*').order('id');
+    const{data,error}=await sb.from('questions').select('*').eq('region','九州').order('id');
     if(error)throw error;
     if(!data||data.length===0){
       document.getElementById('csv-label').textContent='問題データなし';
