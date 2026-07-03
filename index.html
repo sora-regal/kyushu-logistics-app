@@ -128,6 +128,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--off-white);color:var
 .question-text{font-size:16px;line-height:1.9;color:var(--gray-900)}
 .choices{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
 .choice-btn{background:var(--white);border:1.5px solid var(--gray-100);border-radius:var(--radius-xs);padding:16px 18px;text-align:left;font-size:15px;cursor:pointer;transition:all 0.2s;line-height:1.6;color:var(--gray-900);font-family:'Noto Sans JP',sans-serif;box-shadow:var(--shadow)}
+.judge-btn{min-width:52px;background:var(--white);border:1.5px solid var(--gray-100);border-radius:var(--radius-xs);font-size:20px;font-weight:700;cursor:pointer;transition:all 0.2s;color:var(--gray-900);font-family:'Noto Sans JP',sans-serif;box-shadow:var(--shadow)}
+.judge-btn:disabled{cursor:default}
 .choice-btn:hover:not(:disabled){border-color:var(--blue);background:var(--blue-light);transform:translateX(4px)}
 .choice-btn.correct{border-color:var(--green);background:var(--green-light);color:var(--green);font-weight:700}
 .choice-btn.wrong{border-color:var(--red);background:var(--red-light);color:var(--red)}
@@ -755,14 +757,17 @@ async function loadQuestionsFromSupabase(){
       yearDisplay:convertYear(row.year_round||''),
       field:row.category||'',
       question:row.question||'',
-      choices:[row.choice1,row.choice2,row.choice3,row.choice4].filter(c=>c&&c.trim()!==''),
+      choices:[row.choice1,row.choice2,row.choice3,row.choice4,row.choice5].filter(c=>c&&c.trim()!==''),
+      mode:(()=>{const raw=(row.correct_answer||'1').trim();return /^[○×]+$/.test(raw)?'judge':(raw.includes(',')?'multi':'single');})(),
       answers:(()=>{
         const raw=(row.correct_answer||'1').trim();
+        if(/^[○×]+$/.test(raw))return raw.split('');
         if(raw.includes(','))return raw.split(',').map(a=>parseInt(a.trim())).filter(n=>!isNaN(n));
         return[parseInt(raw)||1];
       })(),
       get answer(){return this.answers[0];},
-      get isMulti(){return this.answers.length>1;},
+      get isMulti(){return this.mode==='multi';},
+      get isJudge(){return this.mode==='judge';},
       explanation:row.explanation||'',
       topic:row.topic||'',
       legalBasis:row.legal_basis||'',
@@ -785,12 +790,13 @@ function loadCSV(event){const file=event.target.files[0];if(!file)return;const r
 function parseCSV(text){
   const lines=text.trim().split("\n");const data=[];
   for(let i=1;i<lines.length;i++){
-    const cols=splitCSVLine(lines[i]);if(cols.length<7)continue;
-    const choices=[cols[3],cols[4],cols[5],cols[6]].filter(c=>c&&c.trim()!=="");
-    const answerRaw=cols[7]?.trim()||"1";
-    const answers=answerRaw.includes(",")?answerRaw.split(",").map(a=>parseInt(a.trim())).filter(n=>!isNaN(n)):[parseInt(answerRaw)||1];
+    const cols=splitCSVLine(lines[i]);if(cols.length<8)continue;
+    const choices=[cols[3],cols[4],cols[5],cols[6],cols[7]].filter(c=>c&&c.trim()!=="");
+    const raw=cols[8]?.trim()||"1";
+    const mode=/^[○×]+$/.test(raw)?'judge':(raw.includes(",")?'multi':'single');
+    const answers=mode==='judge'?raw.split(''):(mode==='multi'?raw.split(",").map(a=>parseInt(a.trim())).filter(n=>!isNaN(n)):[parseInt(raw)||1]);
     const yearRaw=cols[0]?.trim()||"";
-    data.push({id:i,year:yearRaw,yearDisplay:convertYear(yearRaw),field:cols[1]?.trim()||"",question:cols[2]?.trim()||"",choices,answers,answer:answers[0],isMulti:answers.length>1,explanation:cols[8]?.trim()||""});
+    data.push({id:i,year:yearRaw,yearDisplay:convertYear(yearRaw),field:cols[1]?.trim()||"",question:cols[2]?.trim()||"",choices,mode,answers,answer:answers[0],isMulti:mode==='multi',isJudge:mode==='judge',explanation:cols[9]?.trim()||"",topic:cols[10]?.trim()||"",legalBasis:cols[11]?.trim()||"",legalQuote:cols[12]?.trim()||""});
   }
   questions=data;document.getElementById("csv-label").textContent=`${questions.length}問 読み込み済み`;document.getElementById("csv-count").textContent="データ登録完了";updateMenuState();
 }
@@ -874,7 +880,7 @@ function updateStats(){
   rateEl.style.color=answeredCount===0?'var(--gray-900)':rate>=80?'var(--green)':rate>=60?'var(--orange)':'var(--red)';
 }
 function renderQuestion(){
-  answered=false;selectedChoices=[];
+  answered=false;selectedChoices=[];judgeSelections={};
   const q=currentList[currentIndex];
   const qno=getQuestionNo(q.year);
   document.getElementById('q-counter').textContent=`問題 ${currentIndex+1} / ${currentList.length}`;
@@ -894,7 +900,26 @@ function renderQuestion(){
   if(submitBtn)submitBtn.style.display='none';
   updateStats();
   const cc=document.getElementById('choices-container');cc.innerHTML='';
-  if(q.isMulti){
+  if(q.isJudge){
+    // 各肢○×判定モード
+    const hint=document.createElement('div');
+    hint.style.cssText='font-size:12px;color:#1a56db;background:#e8f0fe;padding:8px 12px;border-radius:8px;margin-bottom:10px;font-weight:600;';
+    hint.textContent='✏️ 各項目について ○ か × を選び、すべて選んでから「回答する」を押してください';
+    cc.appendChild(hint);
+    q.choices.forEach((c,i)=>{
+      const rowEl=document.createElement('div');
+      rowEl.style.cssText='display:flex;gap:8px;align-items:stretch;margin-bottom:8px;';
+      const txt=document.createElement('div');txt.className='choice-btn';
+      txt.style.cssText='flex:1;cursor:default;box-shadow:none;';txt.textContent=c;
+      const oBtn=document.createElement('button');oBtn.className='judge-btn';oBtn.textContent='○';oBtn.dataset.idx=i;oBtn.dataset.mark='○';
+      const xBtn=document.createElement('button');xBtn.className='judge-btn';xBtn.textContent='×';xBtn.dataset.idx=i;xBtn.dataset.mark='×';
+      oBtn.onclick=()=>toggleJudge(i,'○',oBtn,xBtn,q);
+      xBtn.onclick=()=>toggleJudge(i,'×',xBtn,oBtn,q);
+      rowEl.appendChild(txt);rowEl.appendChild(oBtn);rowEl.appendChild(xBtn);
+      cc.appendChild(rowEl);
+    });
+    if(submitBtn){submitBtn.style.display='block';submitBtn.disabled=true;submitBtn.onclick=()=>submitJudgeAnswer(q);}
+  } else if(q.isMulti){
     // 複数正解：チェックボックス方式
     const hint=document.createElement('div');
     hint.style.cssText='font-size:12px;color:#1a56db;background:#e8f0fe;padding:8px 12px;border-radius:8px;margin-bottom:10px;font-weight:600;';
@@ -907,7 +932,7 @@ function renderQuestion(){
       btn.onclick=()=>toggleMultiChoice(btn,i+1,q);
       cc.appendChild(btn);
     });
-    if(submitBtn){submitBtn.style.display='block';submitBtn.disabled=true;}
+    if(submitBtn){submitBtn.style.display='block';submitBtn.disabled=true;submitBtn.onclick=()=>submitMultiAnswer(q);}
   } else {
     q.choices.forEach((c,i)=>{
       const btn=document.createElement('button');btn.className='choice-btn';
@@ -916,6 +941,33 @@ function renderQuestion(){
   }
 }
 let selectedChoices=[];
+let judgeSelections={};
+function toggleJudge(idx,mark,btn,otherBtn,q){
+  if(answered)return;
+  judgeSelections[idx]=mark;
+  btn.style.background='#13285a';btn.style.color='#fff';btn.style.borderColor='#13285a';
+  otherBtn.style.background='';otherBtn.style.color='';otherBtn.style.borderColor='';
+  const submitBtn=document.getElementById('btn-submit-multi');
+  if(submitBtn)submitBtn.disabled=Object.keys(judgeSelections).length<q.choices.length;
+}
+function submitJudgeAnswer(q){
+  if(answered)return;answered=true;answeredCount++;
+  let correct=true;
+  for(let i=0;i<q.choices.length;i++){if(judgeSelections[i]!==q.answers[i])correct=false;}
+  const key=String(q.id);
+  if(!questionStats[key])questionStats[key]={correct:0,total:0};
+  questionStats[key].total++;
+  if(correct){correctCount++;questionStats[key].correct++;}else{wrongCount++;}
+  updateStats();
+  document.querySelectorAll('.judge-btn').forEach(btn=>{
+    const i=parseInt(btn.dataset.idx),m=btn.dataset.mark;btn.disabled=true;
+    if(q.answers[i]===m){btn.style.background='#16a34a';btn.style.color='#fff';btn.style.borderColor='#16a34a';}
+    else if(judgeSelections[i]===m){btn.style.background='#dc2626';btn.style.color='#fff';btn.style.borderColor='#dc2626';}
+    else{btn.style.background='';btn.style.color='';btn.style.borderColor='';}
+  });
+  const submitBtn=document.getElementById('btn-submit-multi');if(submitBtn)submitBtn.style.display='none';
+  showResult(correct,q);
+}
 function toggleMultiChoice(btn,idx,q){
   if(answered)return;
   if(selectedChoices.includes(idx)){
