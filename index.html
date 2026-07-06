@@ -706,7 +706,7 @@ async function saveWrongIds(){
 }
 
 async function loadUserStats(){
-  const{data,error}=await sb.from('study_records').select('*').eq('user_id',currentUser.id);
+  const{data,error}=await sb.from('study_records').select('*').eq('user_id',currentUser.id).eq('region','九州');
   if(!data||data.length===0){document.getElementById('total-sessions').textContent='0';document.getElementById('total-correct').textContent='0';document.getElementById('total-rate').textContent='-%';allStudyRecords=[];return;}
   allStudyRecords=data;
   const totalQ=data.reduce((s,r)=>s+r.total_questions,0);const totalC=data.reduce((s,r)=>s+r.correct_count,0);
@@ -1039,7 +1039,7 @@ async function openAdmin(){
     });
     const users=await res.json();
     // 全セッション
-    const{data:records}=await sb.from('study_records').select('*');
+    const{data:records}=await sb.from('study_records').select('*').eq('region','九州');
     // 統計
     document.getElementById('admin-total-users').textContent=users.length||0;
     document.getElementById('admin-total-sessions').textContent=records?records.length:0;
@@ -1322,12 +1322,12 @@ function quitNow(){document.getElementById('quit-modal').classList.remove('show'
 async function saveAndShowResult(isPartial){
   stopMockTimer();
   if(currentUser&&answeredCount>0){
-    await sb.from('study_records').insert({user_id:currentUser.id,session_date:new Date().toISOString().split('T')[0],mode:currentMode,total_questions:answeredCount,correct_count:correctCount,wrong_count:wrongCount});
+    await sb.from('study_records').insert({user_id:currentUser.id,session_date:new Date().toISOString().split('T')[0],mode:currentMode,total_questions:answeredCount,correct_count:correctCount,wrong_count:wrongCount,region:'九州'});
     await saveWrongIds();// wrong_idsをSupabaseに保存
   }
   let cumSessions='-',cumCorrect='-',cumRate='-%';
   if(currentUser){
-    const{data}=await sb.from('study_records').select('*').eq('user_id',currentUser.id);
+    const{data}=await sb.from('study_records').select('*').eq('user_id',currentUser.id).eq('region','九州');
     if(data&&data.length>0){const totalQ=data.reduce((s,r)=>s+r.total_questions,0);const totalC=data.reduce((s,r)=>s+r.correct_count,0);cumSessions=data.length;cumCorrect=totalC;cumRate=totalQ>0?Math.round((totalC/totalQ)*100)+'%':'-%';}
   }
   document.getElementById('cum-sessions').textContent=cumSessions;document.getElementById('cum-correct').textContent=cumCorrect;document.getElementById('cum-rate').textContent=cumRate;
