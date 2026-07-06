@@ -667,10 +667,10 @@ async function loadUserProfile(){
       // question_statsをSupabaseから復元
       if(data.question_stats&&typeof data.question_stats==='object'){
         questionStats=data.question_stats;
-        // question_statsからwrong_idsを再計算（正解率60%以下・2回以上）
-        wrongIds=Object.entries(questionStats)
-          .filter(([,v])=>v.total>=2&&(v.correct/v.total)<=0.6)
-          .map(([k])=>parseInt(k));
+      }
+      // 間違い復習リスト（案1）：保存済みwrong_idsをそのまま復元
+      if(Array.isArray(data.wrong_ids)){
+        wrongIds=data.wrong_ids.map(x=>parseInt(x)).filter(n=>!isNaN(n));
       }
       const end=new Date(data.contract_end);const now=new Date();const isActive=end>=now;
       document.getElementById('user-contract-display').textContent=`契約期間: ${data.contract_start} 〜 ${data.contract_end}`;
@@ -692,11 +692,7 @@ async function saveWrongIds(){
   if(!currentUser)return;
   try{
     const{data:{session}}=await sb.auth.getSession();if(!session)return;
-    // question_statsからwrong_idsを自動生成（正解率60%以下の問題）
-    const computedWrongIds=Object.entries(questionStats)
-      .filter(([,v])=>v.total>=2&&(v.correct/v.total)<=0.6)
-      .map(([k])=>parseInt(k));
-    wrongIds=computedWrongIds;
+    // 案1：wrongIdsは採点時に増減した動的集合をそのまま保存する
     await fetch(`${SUPABASE_URL}/rest/v1/user_profiles?id=eq.${currentUser.id}`,{
       method:'PATCH',
       headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json','Prefer':'return=minimal'},
@@ -1012,6 +1008,9 @@ function selectAnswer(chosen,q){
   showResult(correct,q);
 }
 function showResult(correct,q){
+  // 間違い復習リスト（案1）：間違えたら追加、正解したら除去
+  if(correct){const _wi=wrongIds.indexOf(q.id);if(_wi>-1)wrongIds.splice(_wi,1);}
+  else if(!wrongIds.includes(q.id)){wrongIds.push(q.id);}
   const rc=document.getElementById('result-card');rc.style.display='block';rc.className=`result-card show ${correct?'ok':'ng'}`;
   const rl=document.getElementById('result-label');rl.className=`result-label ${correct?'ok':'ng'}`;
   rl.textContent=correct?'✅ 正解！':'❌ 不正解';
