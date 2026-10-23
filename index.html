@@ -447,13 +447,18 @@ canvas{max-width:100%}
         <div id="result-topic-wrap" style="display:none">
           <div style="font-size:10px;font-weight:700;color:#1a56db;letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">📌 論点</div>
           <div id="result-topic" style="font-size:13px;color:#334155;line-height:1.6;background:#f1f5f9;border-radius:6px;padding:8px 10px"></div>
+          <div id="result-freq" style="display:none;font-size:12px;color:#475569;line-height:1.6;margin-top:4px;padding:0 2px"></div>
+        </div>
+        <div id="result-keypoint-wrap" style="display:none">
+          <div style="font-size:10px;font-weight:700;color:#b45309;letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">💡 要点（まとめ）</div>
+          <div id="result-keypoint" style="font-size:13px;color:#334155;line-height:1.6;background:#fffbeb;border-radius:6px;padding:8px 10px;border-left:3px solid #f59e0b"></div>
         </div>
         <div id="result-basis-wrap" style="display:none">
           <div style="font-size:10px;font-weight:700;color:#1a56db;letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">📖 根拠条文</div>
           <div id="result-basis" style="font-size:13px;color:#334155;line-height:1.6;background:#f1f5f9;border-radius:6px;padding:8px 10px"></div>
         </div>
         <div id="result-quote-wrap" style="display:none">
-          <div style="font-size:10px;font-weight:700;color:#1a56db;letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">📝 根拠箇所</div>
+          <div style="font-size:10px;font-weight:700;color:#1a56db;letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">📝 根拠箇所（条文の文言）</div>
           <div id="result-quote" style="font-size:13px;color:#334155;line-height:1.6;background:#eff6ff;border-radius:6px;padding:8px 10px;border-left:3px solid #1a56db"></div>
         </div>
       </div>
@@ -767,7 +772,9 @@ async function loadQuestionsFromSupabase(){
       explanation:row.explanation||'',
       topic:row.topic||'',
       legalBasis:row.legal_basis||'',
-      legalQuote:row.legal_quote||''
+      legalQuote:row.legal_quote||'',
+      keyPoint:row.key_point||'',
+      topicGroup:row.topic_group||''
     }));
     document.getElementById('csv-label').textContent=`${questions.length}問 読み込み済み`;
     document.getElementById('csv-count').textContent='データ取得完了（Supabase）';
@@ -792,9 +799,22 @@ function parseCSV(text){
     const mode=/^[○×]+$/.test(raw)?'judge':(raw.includes(",")?'multi':'single');
     const answers=mode==='judge'?raw.split(''):(mode==='multi'?raw.split(",").map(a=>parseInt(a.trim())).filter(n=>!isNaN(n)):[parseInt(raw)||1]);
     const yearRaw=cols[0]?.trim()||"";
-    data.push({id:i,year:yearRaw,yearDisplay:convertYear(yearRaw),field:cols[1]?.trim()||"",question:cols[2]?.trim()||"",choices,mode,answers,answer:answers[0],isMulti:mode==='multi',isJudge:mode==='judge',explanation:cols[9]?.trim()||"",topic:cols[10]?.trim()||"",legalBasis:cols[11]?.trim()||"",legalQuote:cols[12]?.trim()||""});
+    data.push({id:i,year:yearRaw,yearDisplay:convertYear(yearRaw),field:cols[1]?.trim()||"",question:cols[2]?.trim()||"",choices,mode,answers,answer:answers[0],isMulti:mode==='multi',isJudge:mode==='judge',explanation:cols[9]?.trim()||"",topic:cols[10]?.trim()||"",legalBasis:cols[11]?.trim()||"",legalQuote:cols[12]?.trim()||"",keyPoint:cols[14]?.trim()||"",topicGroup:cols[15]?.trim()||""});
   }
   questions=data;document.getElementById("csv-label").textContent=`${questions.length}問 読み込み済み`;document.getElementById("csv-count").textContent="データ登録完了";updateMenuState();
+}
+// 出題回数：同じ「論点のまとまり」(topic_group) が、読み込んだ全問題の何回分に出ているかを数える（新しい回を足すと自動で増える）
+function roundSortKey(r){const m=r.match(/R(\d+)\.(\d+)/);return m?parseInt(m[1])*100+parseInt(m[2]):0;}
+function topicFreqText(q){
+  if(!q||!q.topicGroup)return '';
+  const all=new Set(questions.map(x=>getYearKey(x.year)).filter(Boolean));
+  const order=[...all].sort((a,b)=>roundSortKey(a)-roundSortKey(b));
+  if(order.length===0)return '';
+  const range=order.length>1?`${order[0]}〜${order[order.length-1]}の`:'';
+  return q.topicGroup.split('／').map(g=>g.trim()).filter(Boolean).map(g=>{
+    const hit=order.filter(r=>questions.some(x=>getYearKey(x.year)===r&&(x.topicGroup||'').split('／').map(t=>t.trim()).includes(g)));
+    return `「${g}」は、九州の${range}${order.length}回中${hit.length}回出ています（${hit.join('・')}）。`;
+  }).join('\n');
 }
 function convertYear(raw){
   const m=raw.match(/R(\d+)\.(\d+)/);
@@ -1015,15 +1035,19 @@ function showResult(correct,q){
   const rl=document.getElementById('result-label');rl.className=`result-label ${correct?'ok':'ng'}`;
   rl.textContent=correct?'✅ 正解！':'❌ 不正解';
   document.getElementById('result-explanation').textContent=q.explanation||'解説なし';
-  // 論点・根拠条文・根拠箇所
+  // 論点・要点・根拠条文・根拠箇所
   const legalInfo=document.getElementById('result-legal-info');
   const topicWrap=document.getElementById('result-topic-wrap');
   const basisWrap=document.getElementById('result-basis-wrap');
   const quoteWrap=document.getElementById('result-quote-wrap');
   if(q.topic){document.getElementById('result-topic').textContent=q.topic;topicWrap.style.display='block';}else{topicWrap.style.display='none';}
+  const freqEl=document.getElementById('result-freq');const freq=topicFreqText(q);
+  if(freq&&q.topic){freqEl.textContent='📊 出題回数：'+freq;freqEl.style.whiteSpace='pre-line';freqEl.style.display='block';}else{freqEl.textContent='';freqEl.style.display='none';}
   if(q.legalBasis){document.getElementById('result-basis').textContent=q.legalBasis;basisWrap.style.display='block';}else{basisWrap.style.display='none';}
+  const kpWrap=document.getElementById('result-keypoint-wrap');
+  if(q.keyPoint){document.getElementById('result-keypoint').textContent=q.keyPoint;kpWrap.style.display='block';}else{kpWrap.style.display='none';}
   if(q.legalQuote){document.getElementById('result-quote').textContent=q.legalQuote;quoteWrap.style.display='block';}else{quoteWrap.style.display='none';}
-  if(q.topic||q.legalBasis||q.legalQuote){legalInfo.style.display='flex';}else{legalInfo.style.display='none';}
+  if(q.topic||q.keyPoint||q.legalBasis||q.legalQuote){legalInfo.style.display='flex';}else{legalInfo.style.display='none';}
   const nb=document.getElementById('btn-next');nb.textContent=currentIndex+1<currentList.length?'次の問題へ →':'結果を見る';nb.className='btn-next show';
   document.getElementById('btn-quit-mid').className='btn-quit-mid show';updateMenuState();
 }
