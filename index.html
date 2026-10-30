@@ -693,6 +693,29 @@ async function loadUserProfile(){
   }catch(e){document.getElementById('user-contract-display').textContent='契約情報なし（管理者にお問い合わせください）';}
 }
 
+// ===== 1問ごとの保存（2026-10-30）=====
+// 1回の演習につき study_records は1行。最初の1問で行を作り、そのあとは同じ行を上書きする。
+// 保存は1つずつ順番に行う（速く答えても、行が2つできたり、古い数字で上書きされたりしないように）。
+let currentRecordId=null;
+let saveChain=Promise.resolve();
+function saveProgress(){
+  saveChain=saveChain.then(saveProgressNow).catch(e=>console.error('学習記録の保存失敗',e));
+  return saveChain;
+}
+async function saveProgressNow(){
+  if(!currentUser||answeredCount<1)return;
+  const row={total_questions:answeredCount,correct_count:correctCount,wrong_count:wrongCount};
+  if(currentRecordId===null){
+    const{data,error}=await sb.from('study_records').insert({user_id:currentUser.id,session_date:new Date().toISOString().split('T')[0],mode:currentMode,...row,region:'九州'}).select('id').single();
+    if(error)throw error;
+    currentRecordId=data.id;
+  }else{
+    const{error}=await sb.from('study_records').update(row).eq('id',currentRecordId).eq('user_id',currentUser.id);
+    if(error)throw error;
+  }
+  await saveWrongIds();// 間違えた問題のリストと問題ごとの成績も、毎回保存する
+}
+
 async function saveWrongIds(){
   if(!currentUser)return;
   try{
@@ -882,7 +905,7 @@ function startReview(){const list=questions.filter(q=>wrongIds.includes(q.id));i
 function startReviewFromResult(){const list=questions.filter(q=>wrongIds.includes(q.id));if(list.length)startQuiz(list,'間違えた問題の復習');}
 function startQuiz(list,label){
   if(isMockMode&&label!=='📝 模擬試験')stopMockTimer();
-  currentList=quizOrder==='shuffle'?shuffle([...list]):[...list];currentIndex=0;correctCount=0;wrongCount=0;answeredCount=0;currentMode=label;document.getElementById('quiz-mode-label').textContent=label;showScreen('quiz-screen');renderQuestion();
+  currentList=quizOrder==='shuffle'?shuffle([...list]):[...list];currentIndex=0;correctCount=0;wrongCount=0;answeredCount=0;currentMode=label;currentRecordId=null;document.getElementById('quiz-mode-label').textContent=label;showScreen('quiz-screen');renderQuestion();
 }
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
 function updateStats(){
@@ -1031,6 +1054,7 @@ function showResult(correct,q){
   // 間違い復習リスト（案1）：間違えたら追加、正解したら除去
   if(correct){const _wi=wrongIds.indexOf(q.id);if(_wi>-1)wrongIds.splice(_wi,1);}
   else if(!wrongIds.includes(q.id)){wrongIds.push(q.id);}
+  saveProgress();// 1問答えるごとに学習記録を保存（2026-10-30）
   const rc=document.getElementById('result-card');rc.style.display='block';rc.className=`result-card show ${correct?'ok':'ng'}`;
   const rl=document.getElementById('result-label');rl.className=`result-label ${correct?'ok':'ng'}`;
   rl.textContent=correct?'✅ 正解！':'❌ 不正解';
@@ -1345,9 +1369,9 @@ function quitNow(){document.getElementById('quit-modal').classList.remove('show'
 async function saveAndShowResult(isPartial){
   stopMockTimer();
   if(currentUser&&answeredCount>0){
-    await sb.from('study_records').insert({user_id:currentUser.id,session_date:new Date().toISOString().split('T')[0],mode:currentMode,total_questions:answeredCount,correct_count:correctCount,wrong_count:wrongCount,region:'九州'});
-    await saveWrongIds();// wrong_idsをSupabaseに保存
+    await saveProgress();// 1問ごとに保存してきた記録を、最後の状態で確定する（2026-10-30）
   }
+  currentRecordId=null;
   let cumSessions='-',cumCorrect='-',cumRate='-%';
   if(currentUser){
     const{data}=await sb.from('study_records').select('*').eq('user_id',currentUser.id).eq('region','九州');
