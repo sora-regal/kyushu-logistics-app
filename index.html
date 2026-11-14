@@ -874,7 +874,7 @@ function openFilter(type){
       if(!yearMap[key]){yearMap[key]={display:convertYear(key),questions:[]};}
       yearMap[key].questions.push(q);
     });
-    Object.keys(yearMap).sort().forEach(key=>{
+    Object.keys(yearMap).sort((a,b)=>roundSortKey(a)-roundSortKey(b)).forEach(key=>{
       const {display,questions:qs}=yearMap[key];
       const rate=getModeRate(display);
       const rateHtml=rate!==null?`<span style="font-size:11px;color:var(--gray-500);min-width:70px;text-align:right">正解率 ${rate}%</span>`:`<span style="min-width:70px"></span>`;
